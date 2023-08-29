@@ -21,15 +21,6 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
-from oauth2tools.callback import BaseCallBackHandler
-from flask import request
+class PlatformType:
 
-
-class WeiBoCallBackHandler(BaseCallBackHandler):
-
-    def do_call(self):
-        self.oauth_client.get_access_token(request)
-        self.oauth_client.get_user_info_by_token(self.oauth_client.get_token(),
-                                                 self.oauth_client.get_uid())
-        self.oauth_client.save_model()
-        return "1"
+    WeiBo = "weibo"

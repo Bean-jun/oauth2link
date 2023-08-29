@@ -21,11 +21,14 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
+import datetime
+
 import requests
 from flask import g
 from flask.wrappers import Request
 from oauth2tools.callback import WeiBoCallBackHandler
 from oauth2tools.platform import BaseOauth2
+from oauth2tools.types import PlatformType
 
 
 class WeiBoAccessApi:
@@ -124,3 +127,23 @@ class WeiBoOauth2(BaseOauth2):
         获取用户头像
         """
         return self.get_info("avatar_hd")
+
+    def save_model(self):
+        obj = self.get_model()
+        if not obj:
+            obj = self.sql_session_model(
+                username=self.get_uid(),
+                realname=self.get_username(),
+                source=PlatformType.WeiBo,
+                access_token=self.access_token(),
+                expires=datetime.datetime.now() + datetime.timedelta(seconds=self.get_expires()),
+            )
+            self.db.session.add(obj)
+        else:
+            obj.access_token = self.get_access_token()
+            obj.expires = datetime.datetime.now() + datetime.timedelta(seconds=self.get_expires())
+        self.db.session.commit()
+        return obj
+
+    def get_model(self):
+        return self.db.session.query(self.sql_session_model).filter_by(username=self.get_username(), source=PlatformType.WeiBo).first()

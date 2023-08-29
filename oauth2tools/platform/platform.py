@@ -23,6 +23,7 @@ SOFTWARE.
 """
 import typing as t
 import urllib.parse
+import datetime
 from flask import Flask
 from flask.wrappers import Request
 from oauth2tools.callback import BaseCallBackHandler
@@ -38,11 +39,33 @@ class BaseOauth2:
     }
     CALLBACK_HANDLER = BaseCallBackHandler  # 回调处理器
     API = None  # api地址
+    TABLE = "oauths"    # 表名
 
     def __init__(self, app=None):
         self.name = self.__module__.rsplit(".", 1)[-1]
         if app is not None:
             self.init_app(app)
+
+    def oauth_models(self, app: Flask, table="oauths"):
+        from flask_sqlalchemy import SQLAlchemy
+        self.db = SQLAlchemy(app)
+
+        class Oauth(self.db.Model):
+            __tablename__ = table
+
+            id = self.db.Column(self.db.Integer, primary_key=True)
+            user = self.db.Column(self.db.Integer, comment="用户表id")
+            username = self.db.Column(self.db.String(1024), comment="用户名")
+            realname = self.db.Column(self.db.String(1024), comment="用户第三方名")
+            source = self.db.Column(self.db.String(1024), comment="来源")
+            access_token = self.db.Column(self.db.String(1024), comment="授权token")
+            expires = self.db.Column(self.db.DateTime, comment="过期时间")
+            createtime = self.db.Column(self.db.DateTime, default=datetime.datetime.now)
+            modifytime = self.db.Column(self.db.DateTime, default=datetime.datetime.now)
+
+        with app.app_context():
+            self.db.create_all()
+        self.sql_session_model = Oauth
 
     def init_app(self, app: Flask):
         app_config = dict()
@@ -58,6 +81,7 @@ class BaseOauth2:
         app.add_url_rule(callback_url,
                          view_func=self.CALLBACK_HANDLER.as_view(name="Oauth2_%s" % self.name,
                                                                  oauth_client=self))
+        self.oauth_models(app, self.TABLE)
 
     def make_url(self, arg_list: t.List[str]) -> str:
         url = "&".join(["%s=%s" % (k, v)
@@ -113,3 +137,14 @@ class BaseOauth2:
         """
         raise NotImplementedError
 
+    def save_model(self, kwargs):
+        """
+        存储第三方用户信息
+        """
+        raise NotImplementedError
+
+    def get_model(self, kwargs):
+        """
+        获取第三方用户信息
+        """
+        raise NotImplementedError
