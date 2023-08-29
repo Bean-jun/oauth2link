@@ -108,7 +108,7 @@ class WeiBoOauth2(BaseOauth2):
         """
         获取授权过期时间
         """
-        return self.get_info("expires_in")
+        return self.get_info("expires_in") or 0
 
     def get_uid(self):
         """
@@ -135,15 +135,16 @@ class WeiBoOauth2(BaseOauth2):
                 username=self.get_uid(),
                 realname=self.get_username(),
                 source=PlatformType.WeiBo,
-                access_token=self.access_token(),
+                access_token=self.get_token(),
                 expires=datetime.datetime.now() + datetime.timedelta(seconds=self.get_expires()),
             )
             self.db.session.add(obj)
         else:
-            obj.access_token = self.get_access_token()
+            obj.access_token = self.get_token()
             obj.expires = datetime.datetime.now() + datetime.timedelta(seconds=self.get_expires())
         self.db.session.commit()
         return obj
 
     def get_model(self):
-        return self.db.session.query(self.sql_session_model).filter_by(username=self.get_username(), source=PlatformType.WeiBo).first()
+        return self.db.session.query(self.sql_session_model).filter_by(username=self.get_uid(),
+                                                                       source=PlatformType.WeiBo).first()
