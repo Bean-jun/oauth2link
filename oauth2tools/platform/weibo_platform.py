@@ -30,6 +30,7 @@ from flask.wrappers import Request
 from oauth2tools.callback import WeiBoCallBackHandler
 from oauth2tools.platform import BaseOauth2
 from oauth2tools.types import PlatformType
+from oauth2tools import utils
 
 
 class WeiBoAccessApi:
@@ -54,10 +55,6 @@ class WeiBoOauth2(BaseOauth2):
     CALLBACK_HANDLER = WeiBoCallBackHandler
     API = WeiBoAccessApi
 
-    def get_callback_code(self, req: Request) -> str:
-        code = req.args.get("code")
-        return code
-
     def redirect_url(self) -> str:
         arg_list = ["client_id", "response_type", "redirect_uri", "scope"]
         full_url = "%s/authorize?%s" % (self.API.OAUTH_API,
@@ -70,7 +67,7 @@ class WeiBoOauth2(BaseOauth2):
                                                    self.make_url(arg_list),
                                                    self.get_callback_code(req))
         resp = requests.post(full_url)
-        resp_dict = self.parse_json(resp.json(), "access_token", (
+        resp_dict = utils.parse_json(resp.json(), "access_token", (
             "access_token",
             "expires_in",
             "uid",
@@ -78,13 +75,16 @@ class WeiBoOauth2(BaseOauth2):
         setattr(g, "_%s" % self.name, resp_dict)
         return resp_dict
 
+    def get_user_info(self) -> dict:
+        return self.get_user_info_by_token(self.get_token(), self.get_uid())
+
     def get_user_info_by_token(self, token: str, uid: str) -> dict:
         """
         获取用户信息
         """
         resp = requests.get(self.API.GET_USER_INFO_API +
                             "?access_token=%s&uid=%s" % (token, uid))
-        resp_dict = self.parse_json(resp.json(), "id", (
+        resp_dict = utils.parse_json(resp.json(), "id", (
             "name",
             "avatar_hd",
         ))

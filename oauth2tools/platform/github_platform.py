@@ -30,6 +30,7 @@ from flask.wrappers import Request
 from oauth2tools.callback import GitHubCallBackHandler
 from oauth2tools.platform import BaseOauth2
 from oauth2tools.types import PlatformType
+from oauth2tools import utils
 
 
 class GitHubAccessApi:
@@ -53,10 +54,6 @@ class GitHubOauth2(BaseOauth2):
     CALLBACK_HANDLER = GitHubCallBackHandler
     API = GitHubAccessApi
 
-    def get_callback_code(self, req: Request) -> str:
-        code = req.args.get("code")
-        return code
-
     def redirect_url(self) -> str:
         arg_list = ["client_id",]
         full_url = "%s/authorize?%s" % (self.API.OAUTH_API,
@@ -70,21 +67,24 @@ class GitHubOauth2(BaseOauth2):
                                                                     arg_list),
                                                                 self.get_callback_code(req))
         resp = requests.post(full_url, headers={"accept": 'application/json'})
-        resp_dict = self.parse_json(resp.json(), "access_token", (
+        resp_dict = utils.parse_json(resp.json(), "access_token", (
             "access_token",
         ))
         setattr(g, "_%s" % self.name, resp_dict)
         return resp_dict
+
+    def get_user_info(self):
+        return self.get_user_info_by_token(self.get_token())
 
     def get_user_info_by_token(self, token: str) -> dict:
         """
         获取用户信息
         """
         resp = requests.get(self.API.GET_USER_INFO_API, headers={
-            "Authorization": "Bearer "+token,
+            "Authorization": "Bearer " + token,
             "accept": 'application/json'
         })
-        resp_dict = self.parse_json(resp.json(), "id", (
+        resp_dict = utils.parse_json(resp.json(), "id", (
             "id",
             "login",
             "avatar_url",
