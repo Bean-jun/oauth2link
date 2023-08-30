@@ -1,10 +1,9 @@
-## oauth2tools
+## oauth2link
 
 让你的网站平台通过第三方平台快速登录授权,目前支持的平台有：
 
-|||
-| :---- | ----: | 
-**新浪微博** | **GitHub** 
+- [×] 新浪微博
+- [×] GitHub
 
 
 ### 一、快速入门
@@ -14,6 +13,9 @@
     ```shell
     git clone https://github.com/Bean-jun/oauth2link.git
     python setup.py install
+
+    # 或者
+    pip install oauth2link
     ```
 
 2. 在项目中填写配置文件
@@ -68,6 +70,6 @@
 
 ### 二、TODO
 
-- [√] 实现多平台兼容运行
+- [×] 实现多平台兼容运行
 
 - [ ] 纳入更多支持oauth2的第三方平台
