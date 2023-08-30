@@ -53,6 +53,7 @@ class GitHubOauth2(GetInfoMix, BaseOauth2):
     }
     CALLBACK_HANDLER = GitHubCallBackHandler
     API = GitHubAccessApi
+    Type = PlatformType.GitHub
 
     def redirect_url(self) -> str:
         arg_list = ["client_id",]
@@ -118,4 +119,4 @@ class GitHubOauth2(GetInfoMix, BaseOauth2):
 
     def get_model(self):
         return self.db.session.query(self.sql_session_model).filter_by(username=self.get_uid(),
-                                                                       source=PlatformType.GitHub).first()
+                                                                       source=self.Type).first()

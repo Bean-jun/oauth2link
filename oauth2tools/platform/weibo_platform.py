@@ -54,6 +54,7 @@ class WeiBoOauth2(GetInfoMix, BaseOauth2):
     }
     CALLBACK_HANDLER = WeiBoCallBackHandler
     API = WeiBoAccessApi
+    Type = PlatformType.WeiBo
 
     def redirect_url(self) -> str:
         arg_list = ["client_id", "response_type", "redirect_uri", "scope"]
@@ -123,4 +124,4 @@ class WeiBoOauth2(GetInfoMix, BaseOauth2):
 
     def get_model(self):
         return self.db.session.query(self.sql_session_model).filter_by(username=self.get_uid(),
-                                                                       source=PlatformType.WeiBo).first()
+                                                                       source=self.Type).first()

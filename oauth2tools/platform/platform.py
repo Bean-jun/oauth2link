@@ -51,8 +51,9 @@ class Base:
         if app is not None:
             self.init_app(app)
 
-    def oauth_models(self, app: Flask, table):
-        if not (Base.__Model and Base.__DB):
+    @classmethod
+    def oauth_models(cls, app: Flask, table: str) -> None:
+        if not (cls.__Model and cls.__DB):
             from flask_sqlalchemy import SQLAlchemy
             db = SQLAlchemy(app)
 
@@ -73,8 +74,8 @@ class Base:
             with app.app_context():
                 db.create_all()
 
-            Base.__Model = Oauth
-            Base.__DB = db
+            cls.__Model = Oauth
+            cls.__DB = db
 
     def init_app(self, app: Flask):
         app_config = dict()
@@ -93,7 +94,7 @@ class Base:
         app.add_url_rule(callback_url,
                          view_func=self.CALLBACK_HANDLER.as_view(name="Oauth2_%s" % self.name,
                                                                  oauth_client=self))
-        self.oauth_models(app, self.__TABLE_NAME)
+        Base.oauth_models(app, self.__TABLE_NAME)
 
     def make_url(self, arg_list: t.List[str]) -> str:
         url = "&".join(["%s=%s" % (k, v)
@@ -124,6 +125,8 @@ class Base:
 
 
 class BaseOauth2(Base):
+
+    Type = None  # 平台类型
 
     def redirect_url(self) -> str:
         """
