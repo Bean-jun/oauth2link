@@ -23,5 +23,6 @@ SOFTWARE.
 """
 from .platform import BaseOauth2
 from .weibo_platform import WeiBoOauth2
+from .github_platform import GitHubOauth2
 
-__all__ = ["BaseOauth2", "WeiBoOauth2"]
+__all__ = ["BaseOauth2", "WeiBoOauth2", "GitHubOauth2"]

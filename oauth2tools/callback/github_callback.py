@@ -21,8 +21,14 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
-from .callback import BaseCallBackHandler
-from .weibo_callback import WeiBoCallBackHandler
-from .github_callback import GitHubCallBackHandler
+from oauth2tools.callback import BaseCallBackHandler
+from flask import request
 
-__all__ = ["BaseCallBackHandler", "WeiBoCallBackHandler", "GitHubCallBackHandler"]
+
+class GitHubCallBackHandler(BaseCallBackHandler):
+
+    def do_call(self):
+        self.oauth_client.get_access_token(request)
+        self.oauth_client.get_user_info_by_token(self.oauth_client.get_token())
+        self.oauth_client.save_model()
+        return "1"
