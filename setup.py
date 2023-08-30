@@ -24,6 +24,7 @@ setup(
     packages=find_packages(),
     install_requires=[
         "Flask>=2.3.2",
+        "Flask-SQLAlchemy>=3.0.5",
         "requests>=2.31.0",
     ],
 
