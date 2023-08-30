@@ -89,7 +89,7 @@ class BaseOauth2:
                        for k, v in self.DEFAULT_CONFIG.items() if k in arg_list])
         return url
 
-    def parse_json(self, json_data: dict, validated_key: str, *keys: t.Union[t.List, t.Tuple]) -> dict:
+    def parse_json(self, json_data: dict, validated_key: str, keys: t.Union[t.List, t.Tuple]) -> dict:
         """
         解析响应
         """

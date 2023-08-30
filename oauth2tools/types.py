@@ -24,3 +24,4 @@ SOFTWARE.
 class PlatformType:
 
     WeiBo = "weibo"
+    GitHub = "github"
