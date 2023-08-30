@@ -26,6 +26,7 @@ import datetime
 import requests
 from flask import g
 from flask.wrappers import Request
+
 from oauth2tools.callback import WeiBoCallBackHandler
 from oauth2tools.platform import BaseOauth2
 from oauth2tools.types import PlatformType
@@ -33,7 +34,7 @@ from oauth2tools.types import PlatformType
 
 class WeiBoAccessApi:
     BASE_API = "https://api.weibo.com"
-    OAUTH_API = BASE_API + '/oauth2/'   # oauth2接口
+    OAUTH_API = BASE_API + '/oauth2/'  # oauth2接口
     GET_USER_INFO_API = BASE_API + "/2/users/show.json"  # 获取用户信息接口
 
 
@@ -43,8 +44,8 @@ class WeiBoOauth2(BaseOauth2):
     """
     DEFAULT_PREFIX = "LINKS_WEIBO_"
     DEFAULT_CONFIG = {
-        "client_id": "",    # 客户端ID
-        "response_type": "code",    # 授权类型
+        "client_id": "",  # 客户端ID
+        "response_type": "code",  # 授权类型
         "redirect_uri": "",  # 重定向地址
         "scope": "",  # 授权范围
         "client_secret": "",  # 客户端秘钥
@@ -69,7 +70,7 @@ class WeiBoOauth2(BaseOauth2):
                                                    self.make_url(arg_list),
                                                    self.get_callback_code(req))
         resp = requests.post(full_url)
-        resp_dict = self.parse_json(resp.json(), "access_token", *(
+        resp_dict = self.parse_json(resp.json(), "access_token", (
             "access_token",
             "expires_in",
             "uid",
@@ -83,7 +84,7 @@ class WeiBoOauth2(BaseOauth2):
         """
         resp = requests.get(self.API.GET_USER_INFO_API +
                             "?access_token=%s&uid=%s" % (token, uid))
-        resp_dict = self.parse_json(resp.json(), "id", *(
+        resp_dict = self.parse_json(resp.json(), "id", (
             "name",
             "avatar_hd",
         ))
@@ -136,12 +137,14 @@ class WeiBoOauth2(BaseOauth2):
                 realname=self.get_username(),
                 source=PlatformType.WeiBo,
                 access_token=self.get_token(),
+                avatar=self.get_avatar(),
                 expires=datetime.datetime.now() + datetime.timedelta(seconds=self.get_expires()),
             )
             self.db.session.add(obj)
         else:
             obj.access_token = self.get_token()
             obj.expires = datetime.datetime.now() + datetime.timedelta(seconds=self.get_expires())
+            obj.avatar = self.get_avatar()
         self.db.session.commit()
         return obj
 

@@ -59,6 +59,7 @@ class BaseOauth2:
             realname = self.db.Column(self.db.String(1024), comment="用户第三方名")
             source = self.db.Column(self.db.String(1024), comment="来源")
             access_token = self.db.Column(self.db.String(1024), comment="授权token")
+            avatar = self.db.Column(self.db.String(1024), comment="头像")
             expires = self.db.Column(self.db.DateTime, comment="过期时间")
             createtime = self.db.Column(self.db.DateTime, default=datetime.datetime.now)
             modifytime = self.db.Column(self.db.DateTime, default=datetime.datetime.now)
@@ -88,7 +89,7 @@ class BaseOauth2:
                        for k, v in self.DEFAULT_CONFIG.items() if k in arg_list])
         return url
 
-    def parse_json(self, json_data: dict, validated_key: str, *keys: t.List[str]) -> dict:
+    def parse_json(self, json_data: dict, validated_key: str, *keys: t.Union[t.List, t.Tuple]) -> dict:
         """
         解析响应
         """
