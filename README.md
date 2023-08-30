@@ -12,7 +12,7 @@
 1. 安装项目包
 
     ```shell
-    git clone 本项目
+    git clone https://github.com/Bean-jun/oauth2link.git
     python setup.py install
     ```
 
@@ -37,8 +37,8 @@
 3. 导入本包并初始化&编写回调逻辑(默认的回调逻辑应该是不满足业务需求的)
 
     ```python
-    from oauth2tools.platform import WeiBoOauth2
-    from oauth2tools.callback import BaseCallBackHandler
+    from oauth2link.platform import WeiBoOauth2
+    from oauth2link.callback import BaseCallBackHandler
 
 
     class MyCallBackHandler(BaseCallBackHandler):

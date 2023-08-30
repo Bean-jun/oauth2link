@@ -8,12 +8,12 @@ def readme():
 
 
 def version():
-    from oauth2tools import __version__
+    from oauth2link import __version__
     return __version__
 
 
 setup(
-    name="oauth2tools",
+    name="oauth2link",
     version=version(),
     author="Bean-jun",
     author_email="1342104001@qq.com",
