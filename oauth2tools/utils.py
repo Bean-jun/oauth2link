@@ -21,29 +21,31 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
-from flask.views import MethodView
-from flask import request
+import typing as t
 
 
-class _BaseCallBackHandler(MethodView):
-    def __init__(self, oauth_client) -> None:
-        super().__init__()
-        self.oauth_client = oauth_client
+def parse_json(json_data: dict, validated_key: str, keys: t.Union[t.List, t.Tuple]) -> dict:
+    """
+    解析响应
+    """
+    if validated_key not in json_data:
+        return {}
 
-    def do_call(self):
-        """
-        第三方授权回调
-        """
-        raise NotImplementedError
-
-    def get(self):
-        return self.do_call()
+    res = {}
+    for key in keys:
+        if key in json_data:
+            res[key] = json_data[key]
+    return res
 
 
-class BaseCallBackHandler(_BaseCallBackHandler):
-
-    def do_call(self):
-        self.oauth_client.get_access_token(request)
-        self.oauth_client.get_user_info()
-        self.oauth_client.save_model()
-        return "login successful"
+def replace_dict_key(json_data: dict, replace_keys: dict) -> dict:
+    """
+    字典键替换
+    """
+    res = {}
+    for k, v in json_data.items():
+        if k in replace_keys:
+            res[replace_keys[k]] = v
+        else:
+            res[k] = v
+    return res

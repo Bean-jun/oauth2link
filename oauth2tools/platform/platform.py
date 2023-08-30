@@ -21,15 +21,16 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
+import datetime
 import typing as t
 import urllib.parse
-import datetime
-from flask import Flask
+
+from flask import Flask, g
 from flask.wrappers import Request
 from oauth2tools.callback import BaseCallBackHandler
 
 
-class BaseOauth2:
+class Base:
     """
     Oauth2基类
     """
@@ -58,11 +59,11 @@ class BaseOauth2:
             username = self.db.Column(self.db.String(1024), comment="用户名")
             realname = self.db.Column(self.db.String(1024), comment="用户第三方名")
             source = self.db.Column(self.db.String(1024), comment="来源")
-            access_token = self.db.Column(self.db.String(1024), comment="授权token")
+            access_token = self.db.Column(self.db.String(1024), comment="授权token")  # noqa
             avatar = self.db.Column(self.db.String(1024), comment="头像")
             expires = self.db.Column(self.db.DateTime, comment="过期时间")
-            createtime = self.db.Column(self.db.DateTime, default=datetime.datetime.now)
-            modifytime = self.db.Column(self.db.DateTime, default=datetime.datetime.now)
+            createtime = self.db.Column(self.db.DateTime, default=datetime.datetime.now)  # noqa
+            modifytime = self.db.Column(self.db.DateTime, default=datetime.datetime.now)  # noqa
 
         with app.app_context():
             self.db.create_all()
@@ -89,31 +90,6 @@ class BaseOauth2:
                        for k, v in self.DEFAULT_CONFIG.items() if k in arg_list])
         return url
 
-    def parse_json(self, json_data: dict, validated_key: str, keys: t.Union[t.List, t.Tuple]) -> dict:
-        """
-        解析响应
-        """
-        if validated_key not in json_data:
-            return {}
-
-        res = {}
-        for key in keys:
-            if key in json_data:
-                res[key] = json_data[key]
-        return res
-
-    def replace_dict_key(self, json_data: dict, replace_keys: dict) -> dict:
-        """
-        字典键替换
-        """
-        res = {}
-        for k, v in json_data.items():
-            if k in replace_keys:
-                res[replace_keys[k]] = v
-            else:
-                res[k] = v
-        return res
-
     def get_callback_url(self) -> str:
         """
         获取回调地址
@@ -125,6 +101,16 @@ class BaseOauth2:
         if o.query:
             return "%s?%s" % (o.path, o.query)
         return o.path
+
+    def get_callback_code(self, req: Request) -> str:
+        """
+        获取回调code
+        """
+        code = req.args.get("code")
+        return code
+
+
+class BaseOauth2(Base):
 
     def redirect_url(self) -> str:
         """
@@ -138,14 +124,59 @@ class BaseOauth2:
         """
         raise NotImplementedError
 
+    def get_user_info(self) -> dict:
+        """
+        获取用户信息
+        """
+        raise NotImplementedError
+
     def save_model(self, kwargs):
         """
-        存储第三方用户信息
+        存储第三方用户信息至表中
         """
         raise NotImplementedError
 
     def get_model(self, kwargs):
         """
-        获取第三方用户信息
+        获取第三方用户信息在表中的记录
         """
         raise NotImplementedError
+
+
+class GetInfoMix:
+
+    def get_info(self, key: str) -> str:
+        """
+        获取当前线程对象信息
+        """
+        return getattr(g, "_%s" % self.name, {}).get(key)
+
+    def get_token(self):
+        """
+        获取授权token
+        """
+        return self.get_info("access_token")
+
+    def get_expires(self):
+        """
+        获取授权过期时间
+        """
+        return self.get_info("expires_in") or 0
+
+    def get_uid(self):
+        """
+        获取用户ID        
+        """
+        return self.get_info("id")
+
+    def get_username(self):
+        """
+        获取用户名
+        """
+        return self.get_info("username")
+
+    def get_avatar(self):
+        """
+        获取用户头像
+        """
+        return self.get_info("avatar_url")
