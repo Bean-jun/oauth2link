@@ -21,10 +21,11 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
+import datetime
 import typing as t
 import urllib.parse
-import datetime
-from flask import Flask
+
+from flask import Flask, g
 from flask.wrappers import Request
 from oauth2tools.callback import BaseCallBackHandler
 
@@ -140,3 +141,42 @@ class BaseOauth2(Base):
         获取第三方用户信息在表中的记录
         """
         raise NotImplementedError
+
+
+class GetInfoMix:
+
+    def get_info(self, key: str) -> str:
+        """
+        获取当前线程对象信息
+        """
+        return getattr(g, "_%s" % self.name, {}).get(key)
+
+    def get_token(self):
+        """
+        获取授权token
+        """
+        return self.get_info("access_token")
+
+    def get_expires(self):
+        """
+        获取授权过期时间
+        """
+        return self.get_info("expires_in") or 0
+
+    def get_uid(self):
+        """
+        获取用户ID        
+        """
+        return self.get_info("id")
+
+    def get_username(self):
+        """
+        获取用户名
+        """
+        return self.get_info("username")
+
+    def get_avatar(self):
+        """
+        获取用户头像
+        """
+        return self.get_info("avatar_url")

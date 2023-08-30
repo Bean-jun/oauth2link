@@ -26,11 +26,11 @@ import datetime
 import requests
 from flask import g
 from flask.wrappers import Request
-
-from oauth2tools.callback import GitHubCallBackHandler
-from oauth2tools.platform import BaseOauth2
-from oauth2tools.types import PlatformType
 from oauth2tools import utils
+from oauth2tools.callback import GitHubCallBackHandler
+from oauth2tools.types import PlatformType
+
+from .platform import BaseOauth2, GetInfoMix
 
 
 class GitHubAccessApi:
@@ -39,7 +39,7 @@ class GitHubAccessApi:
     GET_USER_INFO_API = BASE_API + "/user"  # 获取用户信息接口
 
 
-class GitHubOauth2(BaseOauth2):
+class GitHubOauth2(GetInfoMix, BaseOauth2):
     """
     GitHub授权平台
     """
@@ -94,41 +94,8 @@ class GitHubOauth2(BaseOauth2):
         setattr(g, "_%s" % self.name, origin_dict)
         return resp.json()
 
-    def get_info(self, key: str) -> str:
-        """
-        获取当前线程对象信息
-        """
-        return getattr(g, "_%s" % self.name, {}).get(key)
-
-    def get_token(self):
-        """
-        获取授权token
-        """
-        return self.get_info("access_token")
-
-    def get_expires(self):
-        """
-        获取授权过期时间
-        """
-        return self.get_info("expires_in") or 0
-
-    def get_uid(self):
-        """
-        获取用户ID        
-        """
-        return self.get_info("id")
-
     def get_username(self):
-        """
-        获取用户名
-        """
         return self.get_info("login")
-
-    def get_avatar(self):
-        """
-        获取用户头像
-        """
-        return self.get_info("avatar_url")
 
     def save_model(self):
         obj = self.get_model()
