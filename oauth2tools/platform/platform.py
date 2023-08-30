@@ -40,34 +40,41 @@ class Base:
     }
     CALLBACK_HANDLER = BaseCallBackHandler  # 回调处理器
     API = None  # api地址
-    TABLE = "oauths"    # 表名
+
+    __TABLE = "LINKS_TABLE_NAME"    # 表名配置
+    __TABLE_NAME = "link_oauths"    # 表名
+    __Model = None                  # 表模型
+    __DB = None                     # db对象
 
     def __init__(self, app=None):
         self.name = self.__module__.rsplit(".", 1)[-1]
         if app is not None:
             self.init_app(app)
 
-    def oauth_models(self, app: Flask, table="oauths"):
-        from flask_sqlalchemy import SQLAlchemy
-        self.db = SQLAlchemy(app)
+    def oauth_models(self, app: Flask, table):
+        if not (Base.__Model and Base.__DB):
+            from flask_sqlalchemy import SQLAlchemy
+            db = SQLAlchemy(app)
 
-        class Oauth(self.db.Model):
-            __tablename__ = table
+            class Oauth(db.Model):
+                __tablename__ = table
 
-            id = self.db.Column(self.db.Integer, primary_key=True)
-            user = self.db.Column(self.db.Integer, comment="用户表id")
-            username = self.db.Column(self.db.String(1024), comment="用户名")
-            realname = self.db.Column(self.db.String(1024), comment="用户第三方名")
-            source = self.db.Column(self.db.String(1024), comment="来源")
-            access_token = self.db.Column(self.db.String(1024), comment="授权token")  # noqa
-            avatar = self.db.Column(self.db.String(1024), comment="头像")
-            expires = self.db.Column(self.db.DateTime, comment="过期时间")
-            createtime = self.db.Column(self.db.DateTime, default=datetime.datetime.now)  # noqa
-            modifytime = self.db.Column(self.db.DateTime, default=datetime.datetime.now)  # noqa
+                id = db.Column(db.Integer, primary_key=True)
+                user = db.Column(db.Integer, comment="用户表id")
+                username = db.Column(db.String(1024), comment="用户名")
+                realname = db.Column(db.String(1024), comment="用户第三方名")
+                source = db.Column(db.String(1024), comment="来源")
+                access_token = db.Column(db.String(1024), comment="授权token")  # noqa
+                avatar = db.Column(db.String(1024), comment="头像")
+                expires = db.Column(db.DateTime, comment="过期时间")
+                createtime = db.Column(db.DateTime, default=datetime.datetime.now)  # noqa
+                modifytime = db.Column(db.DateTime, default=datetime.datetime.now)  # noqa
 
-        with app.app_context():
-            self.db.create_all()
-        self.sql_session_model = Oauth
+            with app.app_context():
+                db.create_all()
+
+            Base.__Model = Oauth
+            Base.__DB = db
 
     def init_app(self, app: Flask):
         app_config = dict()
@@ -79,11 +86,14 @@ class Base:
 
         self.DEFAULT_CONFIG.update(app_config)
 
+        if self.__TABLE in app.config:
+            self.__TABLE_NAME = app.config[self.__TABLE]
+
         callback_url = self.get_callback_url()
         app.add_url_rule(callback_url,
                          view_func=self.CALLBACK_HANDLER.as_view(name="Oauth2_%s" % self.name,
                                                                  oauth_client=self))
-        self.oauth_models(app, self.TABLE)
+        self.oauth_models(app, self.__TABLE_NAME)
 
     def make_url(self, arg_list: t.List[str]) -> str:
         url = "&".join(["%s=%s" % (k, v)
@@ -108,6 +118,9 @@ class Base:
         """
         code = req.args.get("code")
         return code
+
+    db = property(lambda *args: Base.__DB)  # 获取db对象
+    sql_session_model = property(lambda *args: Base.__Model)    # 获取表模型对象
 
 
 class BaseOauth2(Base):
