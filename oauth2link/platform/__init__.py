@@ -21,8 +21,8 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
-from .platform import BaseOauth2
+from .platform import BaseOauth2, BaseOauth2Impl
 from .weibo_platform import WeiBoOauth2
 from .github_platform import GitHubOauth2
 
-__all__ = ["BaseOauth2", "WeiBoOauth2", "GitHubOauth2"]
+__all__ = ["BaseOauth2", "BaseOauth2Impl", "WeiBoOauth2", "GitHubOauth2"]

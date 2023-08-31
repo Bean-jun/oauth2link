@@ -21,8 +21,6 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
-import datetime
-
 import requests
 from flask import g
 from flask.wrappers import Request
@@ -30,7 +28,7 @@ from oauth2link import utils
 from oauth2link.callback import GitHubCallBackHandler
 from oauth2link.types import PlatformType
 
-from .platform import BaseOauth2, GetInfoMix
+from .platform import BaseOauth2Impl
 
 
 class GitHubAccessApi:
@@ -39,7 +37,7 @@ class GitHubAccessApi:
     GET_USER_INFO_API = BASE_API + "/user"  # 获取用户信息接口
 
 
-class GitHubOauth2(GetInfoMix, BaseOauth2):
+class GitHubOauth2(BaseOauth2Impl):
     """
     GitHub授权平台
     """
@@ -97,26 +95,3 @@ class GitHubOauth2(GetInfoMix, BaseOauth2):
 
     def get_username(self):
         return self.get_info("login")
-
-    def save_model(self):
-        obj = self.get_model()
-        if not obj:
-            obj = self.sql_session_model(
-                username=self.get_uid(),
-                realname=self.get_username(),
-                source=PlatformType.GitHub,
-                access_token=self.get_token(),
-                avatar=self.get_avatar(),
-                expires=datetime.datetime.now() + datetime.timedelta(seconds=self.get_expires()),
-            )
-            self.db.session.add(obj)
-        else:
-            obj.access_token = self.get_token()
-            obj.expires = datetime.datetime.now() + datetime.timedelta(seconds=self.get_expires())
-            obj.avatar = self.get_avatar()
-        self.db.session.commit()
-        return obj
-
-    def get_model(self):
-        return self.db.session.query(self.sql_session_model).filter_by(username=self.get_uid(),
-                                                                       source=self.Type).first()
