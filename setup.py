@@ -17,10 +17,11 @@ setup(
     version=version(),
     author="Bean-jun",
     author_email="1342104001@qq.com",
-    description="oauth2 tools",
+    description="oauth2 link",
     long_description=readme(),
     long_description_content_type='text/markdown',
     license='MIT License',
+    url="https://github.com/Bean-jun/oauth2link",
     packages=find_packages(),
     install_requires=[
         "Flask>=2.3.2",

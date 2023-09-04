@@ -22,7 +22,5 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 from .callback import BaseCallBackHandler
-from .weibo_callback import WeiBoCallBackHandler
-from .github_callback import GitHubCallBackHandler
 
-__all__ = ["BaseCallBackHandler", "WeiBoCallBackHandler", "GitHubCallBackHandler"]
+__all__ = ["BaseCallBackHandler"]
