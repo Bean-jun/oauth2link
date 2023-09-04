@@ -200,6 +200,15 @@ class GetInfoMix:
 
 class BaseOauth2Impl(GetInfoMix, BaseOauth2):
 
+    def redirect_url(self) -> str:
+        pass
+
+    def get_access_token(self, req: Request) -> dict:
+        pass
+
+    def get_user_info(self) -> dict:
+        pass
+
     def save_model(self):
         third_token = self.get_token()
         if not third_token:

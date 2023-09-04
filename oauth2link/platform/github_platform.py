@@ -25,7 +25,6 @@ import requests
 from flask import g
 from flask.wrappers import Request
 from oauth2link import utils
-from oauth2link.callback import GitHubCallBackHandler
 from oauth2link.types import PlatformType
 
 from .platform import BaseOauth2Impl
@@ -49,7 +48,6 @@ class GitHubOauth2(BaseOauth2Impl):
         "scope": "user:email",  # 授权范围
         "client_secret": "",  # 客户端秘钥
     }
-    CALLBACK_HANDLER = GitHubCallBackHandler
     API = GitHubAccessApi
     Type = PlatformType.GitHub
 

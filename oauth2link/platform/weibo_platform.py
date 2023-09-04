@@ -25,7 +25,6 @@ import requests
 from flask import g
 from flask.wrappers import Request
 from oauth2link import utils
-from oauth2link.callback import WeiBoCallBackHandler
 from oauth2link.types import PlatformType
 
 from .platform import BaseOauth2Impl
@@ -50,7 +49,6 @@ class WeiBoOauth2(BaseOauth2Impl):
         "client_secret": "",  # 客户端秘钥
         "grant_type": "authorization_code",  # 授权模式
     }
-    CALLBACK_HANDLER = WeiBoCallBackHandler
     API = WeiBoAccessApi
     Type = PlatformType.WeiBo
 
